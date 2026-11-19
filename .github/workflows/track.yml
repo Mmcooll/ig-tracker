@@ -1,0 +1,39 @@
+name: track
+
+on:
+  schedule:
+    - cron: "7,37 * * * *"  # every 30 min
+  workflow_dispatch:
+
+concurrency:
+  group: track
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SOURCE: ${{ vars.SOURCE || 'fake' }}
+      IG_TOKEN: ${{ secrets.IG_TOKEN }}
+      ALERT_TO: ${{ vars.ALERT_TO || 'alerts@example.com' }}
+      ALERT_FROM: ${{ vars.ALERT_FROM || 'igtracker@example.com' }}
+      SMTP_HOST: ${{ secrets.SMTP_HOST }}
+      SMTP_PORT: ${{ vars.SMTP_PORT || '587' }}
+      SMTP_USER: ${{ secrets.SMTP_USER }}
+      SMTP_PASS: ${{ secrets.SMTP_PASS }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install .
+      - run: python -m igtracker init-db
+      - run: python -m igtracker run
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: outbox
+          path: outbox/
+          if-no-files-found: ignore
