@@ -1,0 +1,16 @@
+[project]
+name = "igtracker"
+version = "0.1.0"
+description = "Instagram tracker"
+requires-python = ">=3.12"
+dependencies = ["psycopg[binary]>=3.2"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["igtracker"]
+
+[tool.setuptools.package-data]
+igtracker = ["schema.sql"]
